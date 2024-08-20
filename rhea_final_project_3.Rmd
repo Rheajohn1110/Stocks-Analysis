@@ -1,0 +1,143 @@
+---
+title: "Final Project - Milestone 3"
+output: html_document
+date: "2023-12-15"
+---
+
+```{r}
+library(base)
+
+library(tidyverse)
+
+stockmarket_data<- read.csv("TataAdani_stockmarket1.csv")
+
+str(stockmarket_data)
+
+head(stockmarket_data)
+
+
+```
+
+```{r}
+library(janitor)
+
+stockmarket_data<- clean_names(stockmarket_data)
+
+head(stockmarket_data)
+```
+
+```{r}
+tata_power_data<- filter(stockmarket_data, company=="TataPower")
+
+adani_power_data<- filter(stockmarket_data, company=="AdaniPower")
+
+```
+
+**#Question 1:**
+
+**Is there a relationship between 'open' and 'close' prices for Tata Power?**
+
+#Hypothesis Testing for Q1:
+H0: There is no linear relationship between 'open' and 'close' prices for Tata Power.
+H1: There is a linear relationship between 'open' and 'close' prices for Tata Power.
+
+For the below analysis, I have selected dependent variable as 'close' and independent variable as 'open'
+
+```{r}
+# Regression analysis for Tata Power
+tata_model <- lm(close ~ open, data=tata_power_data)
+
+summary(tata_model)
+```
+
+The output from a linear regression model in R, where the close price of Tata Power is regressed on the open price.
+
+Coefficients:
+
+Its p-value is 0.162, which is not statistically significant at the conventional alpha levels (0.05), indicating that the intercept is not significantly different from zero.
+**Open:** The coefficient for open is 0.9968646, meaning for every one unit increase in the open price, the close price is expected to increase by approximately the same amount. 
+**The p-value** is <2e-16, which is extremely small, indicating a very strong statistical significance.A p-value this small effectively rejects the null hypothesis, indicating that the model is statistically significant.
+
+**R-squared:** The R² value is 0.9983, meaning that 99.83% of the variability in the close price is explained by the open price. This indicates an extremely high level of explanatory power, although in financial data, this might also warrant skepticism as such high R² values are uncommon.
+
+#creating a scatterplot with linear regression
+```{r}
+ggplot(tata_power_data, aes(x=open, y=close)) +
+  geom_point() +
+  geom_smooth(method='lm', col='blue') +
+  labs(title="Scatterplot with Linear Regression Line for Tata Power",
+       x="Open Price", y="Close Price")
+```
+The graph is a scatterplot with a linear regression line, plotting 'Close Price' as a function of 'Open Price' for Tata Power. Here's an analysis based on the visible elements in the graph:
+
+**Positive Correlation:** The scatterplot shows a positive correlation between the 'Open Price' and 'Close Price', which suggests that as the open price increases, the close price tends to increase as well.
+
+**Linear Relationship:** The linear regression line drawn through the data points indicates that a linear model may be a good fit for describing the relationship between these two variables. This is further evidenced by the data points which seem to cluster around the line.
+
+**Strength of Relationship:** The closeness of the data points to the regression line suggests a strong linear relationship, although this would typically be quantified by a correlation coefficient (like Pearson's r) or the coefficient of determination (R²) from the regression analysis.
+
+Given the apparent strength of the linear relationship, the open price might be a good predictor of the close price for Tata Power. However, it's important to consider other factors that could affect close prices that are not included in this simple one-variable model.
+
+
+**#Question 2:**
+
+**Is there a relationship between 'volume' and 'close' prices for Adani Power?**
+
+**Null Hypothesis (H0):** There is no linear relationship between the trading volume and close prices of Adani Power. (The slope of the regression line is equal to zero.)
+**Alternative Hypothesis (H1):** There is a linear relationship between the trading volume and close prices of Adani Power. (The slope of the regression line is not equal to zero.)
+
+For the below analysis, I have selected dependent variable as 'close' and independent variable as 'volume'
+
+```{r}
+# Running the linear regression for 'volume' and 'close' prices for Adani Power
+adani_model <- lm(close ~ volume, data=adani_power_data)
+
+summary(adani_model)
+```
+
+The linear regression output provided is for a model that attempts to explain the 'Close Price' (close) of Adani Power stock as a function of 'Volume' (volume). Here is the analysis of the regression model output:
+
+**Coefficients:**
+The intercept is approximately 84.45, with a very low p-value (< 2e-16), indicating that it is significantly different from zero. This suggests that when the volume is zero, the estimated closing price is around 84.45.
+The slope coefficient for volume is about 9.479e-08, or 0.00000009479, which is very close to zero and has a high p-value of 0.295. This implies that the effect of volume on the closing price is not statistically significant at conventional levels (e.g., 0.05).
+
+**R-squared Values:**
+
+The 'Multiple R-squared' value is 0.0003211, which is very close to zero. This indicates that only about 0.032% of the variability in the closing price is explained by the volume.
+The 'Adjusted R-squared' value is even smaller, 2.819e-05, adjusting for the number of predictors in the model and showing that essentially none of the variance in the closing price is explained by the volume.
+F-statistic:
+
+The F-statistic is 1.096 with a p-value of 0.2952, which is not statistically significant. This means that there is not enough evidence to conclude that the volume has an effect on the closing price.
+I
+n summary, this regression analysis suggests that there is no significant linear relationship between the trading volume and the closing price of Adani Power stock, as the key predictor 'volume' is not significant, and the model explains almost none of the variation in closing prices.  
+
+
+#Creating a scatterplot to explain the linear regression relationship
+```{r}
+options(scipen = 100, digits = 10)
+
+ggplot(adani_power_data, aes(x=volume, y=close)) +
+  geom_point() +
+  geom_smooth(method='lm', col='blue') +
+  labs(title="Scatterplot with Linear Regression Line for Adani Power",
+       x="Volume", y="Close Price")
+
+options(scipen = 100, digits = 10)
+```
+The scatterplot appears to depict the relationship between 'Volume' (the number of shares traded) and 'Close Price' of Adani Power stock. From the visualization, we can infer the following:
+
+**Linear Regression Line:** The blue line represents the linear regression line, which seems to show little to no slope, suggesting that there is a weak or no linear relationship between the trading volume and the closing price of the stock.
+
+**Data Clustering:** There is a significant clustering of data points at the lower end of the volume scale. This indicates that on most trading days, the volume is relatively low.
+
+**Price Stability:** The closing price of the stock shows some stability across a wide range of volumes, as indicated by the horizontal trend of the regression line.
+
+**Volume Spikes:** There are some days with exceptionally high trading volumes, but these do not seem to correlate with any significant increase or decrease in the closing price.
+
+**Confidence Interval:** The shaded area around the regression line represents the confidence interval for the predicted closing price. The width of this interval suggests greater uncertainty in the prediction of the closing price at higher volumes.
+
+The scatterplot indicates that for Adani Power, the volume of shares traded does not have a strong impact on the closing price, as observed over the range of data presented. This might imply that other factors, such as market news, company performance, or broader economic indicators, could have a more significant impact on the stock price than trading volume alone.
+
+
+
+

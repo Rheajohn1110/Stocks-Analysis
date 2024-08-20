@@ -1,0 +1,187 @@
+---
+title: "Final Project- Milestone 2"
+output:
+  word_document: default
+  html_document: default
+date: "2023-12-05"
+---
+
+For this Milestone of Final Project, we are asked to formulate 3 questions and get their answers using the one sample t test and two sample t tests.
+
+```{r}
+library(base)
+
+library(tidyverse)
+
+stockmarket_data<- read.csv("TataAdani_stockmarket1.csv")
+
+str(stockmarket_data)
+
+head(stockmarket_data)
+
+
+```
+```{r}
+library(janitor)
+
+stockmarket_data<- clean_names(stockmarket_data)
+
+head(stockmarket_data)
+```
+
+```{r}
+tata_power_data<- filter(stockmarket_data, company=="TataPower")
+
+adani_power_data<- filter(stockmarket_data, company=="AdaniPower")
+```
+
+
+#Question 1: Is the average closing price of Tata Power significantly different from the population mean?----
+
+Hypothesis Testing: One-Sample T-Test
+
+Null Hypothesis (H0): There is no significant difference in the average closing price of Tata Power from the population mean.
+
+Alternative Hypothesis (H1):There is a significant difference in the average closing price of Tata Power from the population mean.
+
+```{r}
+
+tataPower_population_mean<- mean(tata_power_data$close)
+
+print(tataPower_population_mean)
+```
+
+#Creating sample for closing price of tata power----
+
+```{r}
+
+set.seed(123)
+
+sample_tatapower_CP<- sample(tata_power_data$close, size = 100)
+
+mean_sample_tatapower_CP<- mean(sample_tatapower_CP)
+
+print(mean_sample_tatapower_CP)
+```
+
+#performing t test----
+
+```{r}
+t_test_CP<- t.test(sample_tatapower_CP, mu= tataPower_population_mean)
+
+print(t_test_CP)
+```
+Interpretation:
+
+t-statistic: The t-statistic is 0.18992.
+
+p-value: The p-value is 0.8498. 
+
+Confidence Interval: The 95% confidence interval for the true mean of Tata Power's closing prices is (86.57291, 109.67130).
+
+Given the p-value is greater than the typical significance level of 0.05, we would not reject the null hypothesis. This suggests that there is not enough evidence to conclude that the true mean of Tata Power's closing prices is different from 97.01669.
+
+
+#Question 2: Is the average high price of Adani Power significantly different from the population mean?----
+
+Null Hypothesis (H0): The true average high price of Adani Power is equal to the population mean.
+
+Alternative Hypothesis (H1):The true average high price of Adani Power is not equal to the specified reference value.
+
+```{r}
+
+adaniPower_population_mean<- mean(adani_power_data$high)
+
+print(adaniPower_population_mean)
+```
+
+#Creating sample----
+```{r}
+
+set.seed(123)
+
+sample_adaniPower_HP<- sample(adani_power_data$high, size = 100)
+
+mean_sample_adaniPower_HP<- mean(sample_adaniPower_HP)
+
+print(mean_sample_adaniPower_HP)
+
+```
+
+#performing t test----
+```{r}
+
+t_test_HP<- t.test(sample_adaniPower_HP, mu= adaniPower_population_mean)
+
+print(t_test_HP)
+
+```
+Interpretation:
+
+t-statistic: The t-statistic is -2.0535.
+
+p-value: The p-value is 0.04266, which is less than the typical significance level of 0.05. This suggests that there is enough evidence to reject the null hypothesis.
+
+Confidence Interval: The 95% confidence interval for the true mean of Adani Power's high prices is (59.8197, 86.7643). The interval does not include the null hypothesis mean of 87.23502.
+
+Sample Estimate: The sample mean for Adani Power's high prices is 73.292.
+
+Conclusion:
+Since the p-value is less than 0.05, we reject the null hypothesis. There is evidence to suggest that the true mean of Adani Power's high prices is not equal to 87.23502.
+
+
+#Question 3: Is there a significant difference in the average closing prices of Tata Power and Adani Power?----
+
+Null Hypothesis (H0): There is no significant difference in the average closing prices between Tata Power and Adani Power.
+
+Alternative Hypothesis (H1): There is a significant difference in the average closing prices between Tata Power and Adani Power.
+
+#Performing two-sample t-test with alpha 0.05----
+```{r}
+
+ttest_tata_adani_CP <- t.test(tata_power_data$close, adani_power_data$close, alpha=0.05)
+print(ttest_tata_adani_CP)
+
+```
+The Welch Two Sample t-test compares the means of two independent samples to determine if they are significantly different from each other. 
+
+Interpretation:
+
+t-statistic: The t-statistic is a measure of how many standard deviations the sample means are away from each other. In this case, the t-statistic is 6.8298.
+
+p-value: The p-value is very close to zero (9.334e-12), indicating strong evidence against the null hypothesis. This suggests that there is a significant difference in the average closing prices between Tata Power and Adani Power.
+
+Confidence Interval: The 95% confidence interval for the true difference in means is (8.308283, 14.997800).
+
+Sample Estimates: The sample mean for Tata Power is 97.01669, and the sample mean for Adani Power is 85.36365.
+
+In conclusion, the small p-value (9.334e-12) indicates strong evidence against the null hypothesis, suggesting that the mean closing prices of Tata Power and Adani Power are significantly different. The 95% confidence interval for the difference in means (8.308283, 14.997800) does not contain 0, further supporting the conclusion that the means are different.
+
+
+#Question 4: Is there a significant difference in the average high prices between Tata Power and Adani Power?----
+
+Null Hypothesis (H0): There is no significant difference in the average high prices between Tata Power and Adani Power.
+Alternative Hypothesis (H1): There is a significant difference in the average high prices between Tata Power and Adani Power.
+
+
+#Performing two-sample t-test with alpha = 0.01
+```{r}
+
+ttest_tataAdani_HP <- t.test(tata_power_data$high, adani_power_data$high, alpha = 0.01)
+
+print(ttest_tataAdani_HP)
+```
+Interpretation:
+
+t-statistic: The t-statistic is 6.5141, suggesting that the sample means are significantly different from each other.
+
+p-value: The p-value is very close to zero (7.904e-11), indicating strong evidence against the null hypothesis.
+
+Confidence Interval: The 95% confidence interval for the true difference in means is (7.915713, 14.731017).
+
+Sample Estimates: The sample mean for Tata Power is 98.55839, and the sample mean for Adani Power is 87.23502.
+
+Conclusion:
+Given the very low p-value, we reject the null hypothesis. There is strong evidence to suggest that there is a significant difference in the average high prices between Tata Power and Adani Power.
+
+

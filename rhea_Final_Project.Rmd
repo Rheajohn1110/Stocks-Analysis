@@ -1,0 +1,282 @@
+---
+title: "Final_Project_6010"
+output: html_document
+date: "2023-11-14"
+---
+
+For my Final Project, I have combined two data sets for Tata Power and Adani Power Stock prices (2010-2023). These two companies are the major power houses in India and competitors as well. Through this project I aim to provide competitive analysis for both the companies. For this Milestone, I have focused on basic exploration of the dataset.
+
+The dataset I have chosen has numeric values with more than 6000 rows and 10 variables.
+
+#Starting with loading required pacakges----
+
+```{r}
+
+library(base)
+
+library(tidyverse)
+
+#install.packages("quantmod")
+library(quantmod)
+```
+
+#Reading the file and exploring----
+```{r}
+stockmarket_data<- read.csv("TataAdani_stockmarket1.csv")
+
+str(stockmarket_data)
+
+head(stockmarket_data)
+```
+
+#Cleaning names for smoother processing----
+```{r}
+library(janitor)
+
+stockmarket_data<- clean_names(stockmarket_data)
+
+head(stockmarket_data)
+```
+
+#Creating two seperate vectors for each company----
+
+```{r}
+
+tata_power_data<- filter(stockmarket_data, company=="TataPower")
+
+adani_power_data<- filter(stockmarket_data, company=="AdaniPower")
+
+```
+
+
+#Boxplot for comparing volume distribution for Tata power and Adani Power
+```{r}
+
+ggplot(stockmarket_data, aes(x = company, y = volume, fill = company)) +
+  geom_boxplot() +
+  ggtitle("Volume Distribution Comparison") +
+  xlab("Company") +
+  ylab("Volume") +
+  scale_y_continuous(labels = scales::comma, limits = c(0, 1000000))
+
+
+```
+
+
+The above box plot shows volume distribution of both the companies. For Adani Power, the volume seems to be symmetricas the median falls in the centre, whereas for Tata power, the median is towards the upper quartile, stating skewness. Fir Adani Power, the whiskers are small whic indicate that the data is almost accumulated at the centre whereas for Tata Power, the volume is spread wider.
+
+
+
+#Tata power trend for open prices yearly----
+```{r}
+
+tata_power_data <- tata_power_data %>%
+  mutate(year = format.Date(tata_power_data$date, "%Y"))
+
+average_opening_prices <- tata_power_data %>%
+  group_by(company, year) %>%
+  summarise(avg_opening_price = mean(open, na.rm = TRUE))
+
+
+ggplot(average_opening_prices, aes(x = year, y = avg_opening_price, color= company)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = company), size = 1)+
+  labs(title = "Average Opening Prices of Tata Power Yearly",
+       x = "Year",
+       y = "Average Opening Price") +
+  theme_minimal()
+
+```
+
+The above graph represents the average opening prices of Tata Power over the years.
+
+
+now, calculating average closing price
+
+```{r}
+average_closing_price<- tata_power_data %>%
+  group_by(company, year) %>%
+  summarise(avg_closing_price = mean(close, na.rm = TRUE))
+
+ggplot(average_closing_price, aes(x = year, y = avg_closing_price, color= company)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = company), size = 1)+
+  labs(title = "Average Closing Prices of Tata Power Yearly",
+       x = "Year",
+       y = "Average Closing Price") +
+  theme_minimal()
+
+```
+
+With the above analysis, it can be sen that there is very less difference between the Opening price and Closing price of Tata power stock.
+
+
+#Calculating opening and closing for Adani Power----
+
+```{r}
+adani_power_data <- adani_power_data %>%
+  mutate(year = format.Date(adani_power_data$date, "%Y"))
+
+average_opening_prices_AD <- adani_power_data %>%
+  group_by(company, year) %>%
+  summarise(avg_opening_price = mean(open, na.rm = TRUE))
+
+ggplot(average_opening_prices_AD, aes(x = year, y = avg_opening_price, color= company)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = company), size = 1)+
+  labs(title = "Average Opening Prices of Adani Power Yearly",
+       x = "Year",
+       y = "Average Opening Price") +
+  theme_minimal()
+```
+
+Opening prices for Adani Power over the years.
+
+
+#Average closing price for Adani Power----
+
+```{r}
+
+average_closing_prices_AD <- adani_power_data %>%
+  group_by(company, year) %>%
+  summarise(avg_closing_price = mean(open, na.rm = TRUE))
+
+ggplot(average_closing_prices_AD, aes(x = year, y = avg_closing_price, color= company)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = company), size = 1)+
+  labs(title = "Average Closing Prices of Adani Power Yearly",
+       x = "Year",
+       y = "Average Opening Price") +
+  theme_minimal()
+```
+
+
+#Whole Comparison of opening and closing prices of both the companies----
+
+```{r}
+
+if (!requireNamespace("reshape2", quietly = TRUE)) {
+  install.packages("reshape2")
+}
+
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(lubridate)
+
+stockmarket_data$date <- as.Date(stockmarket_data$date)
+
+#Extract year from the 'date' column
+stockmarket_data$year <- year(stockmarket_data$date)
+
+#Calculating average opening and closing prices yearly for both companies
+average_prices <- stockmarket_data %>%
+  group_by(company, year) %>%
+  summarise(avg_open_price = mean(open, na.rm = TRUE),
+            avg_close_price = mean(close, na.rm = TRUE))
+
+#Melting the data to long format for better visualization
+melted_data <- melt(average_prices, id.vars = c("company", "year"))
+
+#Plot the result using geom_point and geom_line
+ggplot(melted_data, aes(x = year, y = value, color = company, shape = variable)) +
+  geom_point(size = 3) +
+  geom_line(aes(group = interaction(company, variable)), size = 1) +
+  labs(title = "Average Open and Close Prices Yearly Comparison",
+       x = "Year",
+       y = "Average Price",
+       shape = "Variable") +
+  scale_shape_manual(values = c(16, 17), name = "Variable") +
+  theme_minimal()
+
+```
+
+The above visualisation very well represents the opening and closing prices for Tata Power and Adani Power over the period of 10 years.
+
+
+#Calculating highest prices for Tata power over the period of 10 years----
+```{r}
+
+# Filter data for Tata Power high prices
+top_tata_power <- tata_power_data %>%
+  arrange(desc(high)) %>%
+  head(10)
+
+```
+#Calculating highest stock price of Adani Power----
+
+```{r}
+# Arrange data in descending order based on high prices
+top_adani_power <- adani_power_data %>%
+  arrange(desc(high)) %>%
+  head(10)
+```
+
+# Combine the top 10 data for Tata Power and Adani Power
+```{r}
+
+top_combined <- rbind(
+  mutate(top_tata_power, company = "Tata Power"),
+  mutate(top_adani_power, company = "Adani Power"))
+  
+
+ggplot(top_combined, aes(x = date, y = high, fill = company)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(title = "Top 10 High Prices Comparison",
+       x = "Date",
+       y = "High Price") +
+  scale_fill_manual(values = c("Tata Power" = "blue", "Adani Power" = "orange")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+```
+
+By looking at the above graph, we can analyze the highest prices of stock of both companies. It can be observed that the stock price for Adani Power is higher than of Tata Power.
+
+
+#Calculating lowest prices for the two comapnies----
+```{r}
+low_tata_power <- tata_power_data %>%
+  arrange(low) %>%
+  head(10)
+
+low_adani_power <- adani_power_data %>%
+  arrange(low) %>%
+  head(10)
+
+low_combined <- rbind(
+  mutate(low_tata_power, company = "Tata Power"),
+  mutate(low_adani_power, company = "Adani Power"))
+
+ggplot(low_combined, aes(x = date, y = high, fill = company)) +
+  geom_bar(stat = "identity", position = "dodge", width = 0.7) +
+  labs(title = "10 Lowest Prices Comparison",
+       x = "Date",
+       y = "Low Price") +
+  scale_fill_manual(values = c("Tata Power" = "brown", "Adani Power" = "green")) +
+  theme_minimal() +
+  theme(axis.text.x = element_text(angle = 45, hjust = 1))
+
+```
+
+The bars represent the 10 lower prices of stock for Tata Power and Adani Power. Looking at the data, it can be observed that Adani Power had the lowest prices in 2018 whereas Tata Power had its low in the year 2020. 
+
+
+#Creating comparison box plot for all stock prices----
+```{r}
+#Melting the data to long format for better visualization
+melted_data <- stockmarket_data %>%
+  pivot_longer(cols = c("open", "close", "high", "low"), names_to = "variable", values_to = "value")
+
+#Creating side-by-side box plots for open, close, high, and low prices
+ggplot(melted_data, aes(x = company, y = value, fill = company)) +
+  geom_boxplot() +
+  facet_wrap(~variable, scales = "free_y", ncol = 2) +
+  labs(title = "Comparison of Stock Prices between Tata Power and Adani Power",
+       x = "Company",
+       y = "Stock Price")
+```
+
+The above chart shows a visualization of all the stock prices of Tata Power and Adani Power and we can look at the distribution as well as the outliers of the data.
+
+
+In conclusion, basic exploration of the dataset has been processed as a part of the Final Project - Milestone 1.
